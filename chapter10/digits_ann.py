@@ -41,7 +41,7 @@ def create_ann(hidden_nodes=60):
         (cv2.TERM_CRITERIA_MAX_ITER | cv2.TERM_CRITERIA_EPS, 100, 1.0))
     return ann
 
-def train(ann, samples=50000, epochs=15):
+def train(ann, samples=50000, epochs=10):
 
     tr, test = wrap_data()
 

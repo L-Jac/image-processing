@@ -53,7 +53,7 @@ def wrap_digit(rect, img_w, img_h):
 
 
 ann, test_data = digits_ann.train(
-    digits_ann.create_ann(60), 50000, 15)
+    digits_ann.create_ann(60), 50000, 10)
 
 img_path = "./digit_images/digits_0.jpg"
 img = cv2.imread(img_path, cv2.IMREAD_COLOR)
