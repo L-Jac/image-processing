@@ -5,8 +5,8 @@ import time
 
 class CaptureManager(object):
 
-    def __init__(self, capture, previewWindowManager = None,
-                 shouldMirrorPreview = False):
+    def __init__(self, capture, previewWindowManager=None,
+                 shouldMirrorPreview=False):
 
         self.previewWindowManager = previewWindowManager
         self.shouldMirrorPreview = shouldMirrorPreview
@@ -38,7 +38,7 @@ class CaptureManager(object):
     def frame(self):
         if self._enteredFrame and self._frame is None:
             _, self._frame = self._capture.retrieve(
-                    self._frame, self.channel)
+                self._frame, self.channel)
         return self._frame
 
     @property
@@ -49,7 +49,9 @@ class CaptureManager(object):
     def isWritingVideo(self):
         return self._videoFilename is not None
 
+    # TODO 实现同步抓取一帧
     def enterFrame(self):
+
         """Capture the next frame, if any."""
 
         # But first, check that any previous frame was exited.
@@ -59,6 +61,7 @@ class CaptureManager(object):
         if self._capture is not None:
             self._enteredFrame = self._capture.grab()
 
+    # TODO　实现从当前通道获取图像，估计帧率，显示图像(通过窗口)，完成图像写入文件的请求
     def exitFrame(self):
         """Draw to the window. Write to files. Release the frame."""
 
@@ -73,7 +76,7 @@ class CaptureManager(object):
             self._startTime = time.perf_counter()
         else:
             timeElapsed = time.perf_counter() - self._startTime
-            self._fpsEstimate =  self._framesElapsed / timeElapsed
+            self._fpsEstimate = self._framesElapsed / timeElapsed
         self._framesElapsed += 1
 
         # Draw to the window, if any.
@@ -96,13 +99,14 @@ class CaptureManager(object):
         self._frame = None
         self._enteredFrame = False
 
+    # TODO　余下部分都是写入功能
     def writeImage(self, filename):
         """Write the next exited frame to an image file."""
         self._imageFilename = filename
 
     def startWritingVideo(
             self, filename,
-            encoding = cv2.VideoWriter_fourcc('M','J','P','G')):
+            encoding=cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')):
         """Start writing exited frames to a video file."""
         self._videoFilename = filename
         self._videoEncoding = encoding
@@ -129,7 +133,7 @@ class CaptureManager(object):
                 else:
                     fps = self._fpsEstimate
             size = (int(self._capture.get(
-                        cv2.CAP_PROP_FRAME_WIDTH)),
+                cv2.CAP_PROP_FRAME_WIDTH)),
                     int(self._capture.get(
                         cv2.CAP_PROP_FRAME_HEIGHT)))
             self._videoWriter = cv2.VideoWriter(
@@ -141,7 +145,7 @@ class CaptureManager(object):
 
 class WindowManager(object):
 
-    def __init__(self, windowName, keypressCallback = None):
+    def __init__(self, windowName, keypressCallback=None):
         self.keypressCallback = keypressCallback
 
         self._windowName = windowName
