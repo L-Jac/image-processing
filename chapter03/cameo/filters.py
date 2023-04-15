@@ -193,7 +193,7 @@ class BGRCrossProcessCurveFilter(BGRCurveFilter):
 
 
 class BGRPortraCurveFilter(BGRCurveFilter):
-    """A filter that applies Portra-like curves to BGR."""
+    """一个将类似于Portra的曲线应用于BGR的滤镜。"""
 
     def __init__(self, dtype=numpy.uint8):
         BGRCurveFilter.__init__(

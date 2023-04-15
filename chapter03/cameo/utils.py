@@ -24,7 +24,8 @@ def createLookupArray(func, length=256):
 
 def applyLookupArray(lookupArray, src, dst):
     """使用查找将源映射到目标。"""
-    # 就是复制
+    # lookupArray是一个储存函数值结果的数列
+    # 查找对应值并映射到新数组
     if lookupArray is None:
         return
     dst[:] = lookupArray[src]

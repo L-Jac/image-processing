@@ -26,7 +26,9 @@ class Cameo(object):
             if frame is not None:
                 # 检测边缘
                 filters.strokeEdges(frame, frame)
-
+                # BGRPortraCurveFilter继承BGRCurveFilter
+                # BGRCurveFilter继承BGRFuncFilter
+                # BGRFuncFilter有apply方法用于实现滤镜
                 self._curveFilter.apply(frame, frame)
 
             self._captureManager.exitFrame()
