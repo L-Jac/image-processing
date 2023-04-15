@@ -23,8 +23,17 @@ else:
 
 black = np.zeros_like(img)
 for cnt in contours:
-    epsilon = 0.01 * cv2.arcLength(cnt,True)
-    approx = cv2.approxPolyDP(cnt,epsilon,True)
+    # 计算等值线周长或曲线长度。
+    # 该函数计算曲线长度或闭合等高线周长。
+    # 参数true表示曲线闭合
+    # epsilon 是用来控制近似轮廓的精度的。它的值越小，近似轮廓就越接近原始轮廓。
+    # 如果把0.01换成0.001将会更接近原始轮廓
+    epsilon = 0.01 * cv2.arcLength(cnt, True)
+    # 使用道格拉斯-普克算法（Douglas-Peucker algorithm）来近似轮廓。
+    # 该函数接受一个轮廓和一个精度参数 epsilon，并返回一个近似轮廓。
+    approx = cv2.approxPolyDP(cnt, epsilon, True)
+    # 用来计算一个点集或轮廓的凸包
+    # 该函数接受一个点集或轮廓，并返回一个表示凸包的点集。
     hull = cv2.convexHull(cnt)
     cv2.drawContours(black, [cnt], -1, (0, 255, 0), 2)
     cv2.drawContours(black, [approx], -1, (255, 255, 0), 2)

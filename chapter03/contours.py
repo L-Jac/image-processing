@@ -35,8 +35,11 @@ else:
     _, contours, hier = cv2.findContours(thresh, cv2.RETR_TREE,
                                          cv2.CHAIN_APPROX_SIMPLE)
 
+# 彩色
 color = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+# 先在彩色上绘图再读取坐标在img上绘图
 img = cv2.drawContours(color, contours, -1, (0, 255, 0), 2)
-cv2.imshow("contours", color)
+cv2.imshow("contour1", color)
+cv2.imshow("contour2", img)
 cv2.waitKey()
 cv2.destroyAllWindows()
