@@ -3,6 +3,7 @@ import depth
 import filters
 from managers import WindowManager, CaptureManager
 
+
 class Cameo(object):
 
     def __init__(self):
@@ -34,24 +35,25 @@ class Cameo(object):
         escape -> Quit.
 
         """
-        if keycode == 32: # space
+        if keycode == 32:  # space
             self._captureManager.writeImage('screenshot.png')
-        elif keycode == 9: # tab
+        elif keycode == 9:  # tab
             if not self._captureManager.isWritingVideo:
                 self._captureManager.startWritingVideo(
                     'screencast.avi')
             else:
                 self._captureManager.stopWritingVideo()
-        elif keycode == 27: # escape
+        elif keycode == 27:  # escape
             self._windowManager.destroyWindow()
+
 
 class CameoDepth(Cameo):
 
     def __init__(self):
         self._windowManager = WindowManager('Cameo',
                                             self.onKeypress)
-        #device = cv2.CAP_OPENNI2 # uncomment for Microsoft Kinect via OpenNI2
-        device = cv2.CAP_OPENNI2_ASUS # uncomment for Asus Xtion or Occipital Structure via OpenNI2
+        # device = cv2.CAP_OPENNI2 代表微软 Kinect 的设备索引
+        device = cv2.CAP_OPENNI2_ASUS  # 代表华硕 Xtion或Occipital结构的索引
         self._captureManager = CaptureManager(
             cv2.VideoCapture(device), self._windowManager, True)
         self._curveFilter = filters.BGRPortraCurveFilter()
@@ -61,33 +63,40 @@ class CameoDepth(Cameo):
         self._windowManager.createWindow()
         while self._windowManager.isWindowCreated:
             self._captureManager.enterFrame()
+            # cv2.CAP_OPENNI_DISPARITY_MAP 8位无符号整数值表示的视差图(一种灰度图像)
             self._captureManager.channel = cv2.CAP_OPENNI_DISPARITY_MAP
             disparityMap = self._captureManager.frame
+            # 获取有效深度掩码
             self._captureManager.channel = cv2.CAP_OPENNI_VALID_DEPTH_MASK
             validDepthMask = self._captureManager.frame
+            # 表示 BGR 图像的通道
             self._captureManager.channel = cv2.CAP_OPENNI_BGR_IMAGE
             frame = self._captureManager.frame
             if frame is None:
-                # Failed to capture a BGR frame.
-                # Try to capture an infrared frame instead.
+                # 无法捕获 BGR 帧。
+                # 尝试捕获红外帧。
+                # 表示红外图像的通道
                 self._captureManager.channel = cv2.CAP_OPENNI_IR_IMAGE
                 frame = self._captureManager.frame
 
             if frame is not None:
 
-                # Make everything except the median layer black.
+                # 将除中间层以外的所有内容设为黑色。
+                # 使用视差图和有效深度掩码创建一个中间层掩码，这个掩码是白色的
                 mask = depth.createMedianMask(disparityMap, validDepthMask)
+                # 将掩码中值为 0 的像素对应的图像帧中的像素设为黑色
                 frame[mask == 0] = 0
 
                 if self._captureManager.channel == cv2.CAP_OPENNI_BGR_IMAGE:
-                    # A BGR frame was captured.
-                    # Apply filters to it.
+                    # 捕获了 BGR 帧。
+                    # 对其应用过滤器。
                     filters.strokeEdges(frame, frame)
                     self._curveFilter.apply(frame, frame)
 
             self._captureManager.exitFrame()
             self._windowManager.processEvents()
 
-if __name__=="__main__":
-    #Cameo().run() # uncomment for ordinary camera
-    CameoDepth().run() # uncomment for depth camera
+
+if __name__ == "__main__":
+    # Cameo().run() # uncomment for ordinary camera
+    CameoDepth().run()  # uncomment for depth camera
