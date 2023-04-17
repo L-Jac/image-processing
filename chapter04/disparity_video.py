@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 
-
 left_camera = cv2.VideoCapture(0)
 right_camera = cv2.VideoCapture(1)
 
@@ -12,8 +11,7 @@ cv2.namedWindow('Disparity', cv2.WINDOW_NORMAL)
 
 blockSize = 40
 
-while(cv2.waitKey(1) == -1):
-
+while cv2.waitKey(1) == -1:
     ret1, left_frame = left_camera.read()
     ret2, right_frame = right_camera.read()
 
@@ -22,16 +20,16 @@ while(cv2.waitKey(1) == -1):
     cv2.imshow('Left Camera', left_gray)
     cv2.imshow('Right Camera', right_gray)
     stereo = cv2.StereoSGBM_create(
-        minDisparity = 1,
-        numDisparities = 16,
-        blockSize = blockSize,
-        speckleWindowSize = 10,
-        speckleRange = 32,
-        disp12MaxDiff = 1,
-        P1 = 8*3*blockSize**2,
-        P2 = 32*3*blockSize**2)
+        minDisparity=1,
+        numDisparities=16,
+        blockSize=blockSize,
+        speckleWindowSize=10,
+        speckleRange=32,
+        disp12MaxDiff=1,
+        P1=8 * 3 * blockSize ** 2,
+        P2=32 * 3 * blockSize ** 2)
     disparity = stereo.compute(left_gray, right_gray)
     disparity = cv2.normalize(
-            disparity, disparity, alpha=0, beta=255,
-            norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+        disparity, disparity, alpha=0, beta=255,
+        norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
     cv2.imshow('Disparity', disparity)
