@@ -1,35 +1,4 @@
 #!/usr/bin/env python
-# Software License Agreement (BSD License)
-#
-# Copyright (c) 2012, Philipp Wagner <bytefish[at]gmx[dot]de>.
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-#  * Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#  * Redistributions in binary form must reproduce the above
-#    copyright notice, this list of conditions and the following
-#    disclaimer in the documentation and/or other materials provided
-#    with the distribution.
-#  * Neither the name of the author nor the names of its
-#    contributors may be used to endorse or promote products derived
-#    from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
 
 # ------------------------------------------------------------------------------------------------
 # Note:
@@ -42,15 +11,20 @@ import sys
 import cv2
 import numpy as np
 
+
+# 这个函数的主要用途是将给定数组中的值归一化到一个特定范围内。
+# 这在数据预处理中非常常见，因为许多机器学习算法对数据的范围和分布都很敏感。
+# 通过将数据归一化到一个特定范围内，可以提高算法的性能并避免一些问题。
+# 例如，在人脸识别中，我们可能需要将图像的像素值归一化到 0 到 1 之间，以便更好地处理图像数据。这个函数就可以用来完成这个任务。
 def normalize(X, low, high, dtype=None):
-    """Normalizes a given array in X to a value between low and high."""
+    """将给定数组 X 中的值归一化到 low 和 high 之间"""
     X = np.asarray(X)
     minX, maxX = np.min(X), np.max(X)
-    # normalize to [0...1].
+    # 将值归一化到 0 到 1 之间
     X = X - float(minX)
     X = X / float((maxX - minX))
-    # scale to [low...high].
-    X = X * (high-low)
+    # 将值缩放到 low 和 high 之间
+    X = X * (high - low)
     X = X + low
     if dtype is None:
         return np.asarray(X)
@@ -71,30 +45,32 @@ def read_images(path, sz=None):
             y: The corresponding labels (the unique number of the subject, person) in a Python list.
     """
     c = 0
-    X,y = [], []
+    X, y = [], []
     for dirname, dirnames, filenames in os.walk(path):
         for subdirname in dirnames:
             subject_path = os.path.join(dirname, subdirname)
             for filename in os.listdir(subject_path):
                 try:
-                    if (filename == ".directory"):
+                    if filename == ".directory":
                         continue
                     filepath = os.path.join(subject_path, filename)
                     im = cv2.imread(os.path.join(subject_path, filename), cv2.IMREAD_GRAYSCALE)
-                    if (im is None):
+                    if im is None:
                         print("image " + filepath + " is none")
                     # resize to given size (if given)
-                    if (sz is not None):
+                    if sz is not None:
                         im = cv2.resize(im, sz)
                     X.append(np.asarray(im, dtype=np.uint8))
                     y.append(c)
-                except IOError, (errno, strerror):
+                except IOError as e:
+                    errno, strerror = e.args
                     print("I/O error({0}): {1}".format(errno, strerror))
-                except:
+                except Exception:
                     print("Unexpected error:", sys.exc_info()[0])
                     raise
-            c = c+1
-    return [X,y]
+            c = c + 1
+    return [X, y]
+
 
 if __name__ == "__main__":
     # This is where we write the images, if an output_dir is given
@@ -107,7 +83,7 @@ if __name__ == "__main__":
         print("USAGE: facerec_demo.py </path/to/images> [</path/to/store/images/at>]")
         sys.exit()
     # Now read in the image data. This must be a valid path!
-    [X,y] = read_images(sys.argv[1])
+    [X, y] = read_images(sys.argv[1])
     # Convert labels to 32bit integers. This is a workaround for 64bit machines,
     # because the labels will truncated else. This will be fixed in code as
     # soon as possible, so Python users don't need to know about this.
@@ -158,14 +134,14 @@ if __name__ == "__main__":
     # images. You could also use cv::normalize here, but sticking
     # to NumPy is much easier for now.
     # Note: eigenvectors are stored by column:
-    for i in xrange(min(len(X), 16)):
-        eigenvector_i = eigenvectors[:,i].reshape(X[0].shape)
+    for i in range(min(len(X), 16)):
+        eigenvector_i = eigenvectors[:, i].reshape(X[0].shape)
         eigenvector_i_norm = normalize(eigenvector_i, 0, 255, dtype=np.uint8)
         # Show or save the images:
         if out_dir is None:
-            cv2.imshow("%s/eigenface_%d" % (out_dir,i), eigenvector_i_norm)
+            cv2.imshow("%s/eigenface_%d" % (out_dir, i), eigenvector_i_norm)
         else:
-            cv2.imwrite("%s/eigenface_%d.png" % (out_dir,i), eigenvector_i_norm)
+            cv2.imwrite("%s/eigenface_%d.png" % (out_dir, i), eigenvector_i_norm)
     # Show the images:
     if out_dir is None:
         cv2.waitKey(0)
