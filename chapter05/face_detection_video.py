@@ -1,19 +1,16 @@
 import cv2
 
-# 检测脸
+
 face_cascade = cv2.CascadeClassifier(
     f'{cv2.data.haarcascades}haarcascade_frontalface_default.xml')
-# 检测眼睛
 eye_cascade = cv2.CascadeClassifier(
     f'{cv2.data.haarcascades}haarcascade_eye.xml')
 
 camera = cv2.VideoCapture(0)
-# cv2.waitKey(1)是OpenCV中的一个函数，用于在显示图像时暂停程序执行并等待用户按键，没按下是-1。
-while cv2.waitKey(1) == -1:
+while (cv2.waitKey(1) == -1):
     success, frame = camera.read()
     if success:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        # 设定人脸最小尺寸120*120
         faces = face_cascade.detectMultiScale(
             gray, 1.3, 5, minSize=(120, 120))
         for (x, y, w, h) in faces:
