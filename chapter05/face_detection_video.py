@@ -13,7 +13,7 @@ while cv2.waitKey(1) == -1:
     success, frame = camera.read()
     if success:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        # # 设定人脸最小尺寸120*120
+        # 设定人脸最小尺寸120*120
         faces = face_cascade.detectMultiScale(
             gray, 1.3, 5, minSize=(120, 120))
         for (x, y, w, h) in faces:

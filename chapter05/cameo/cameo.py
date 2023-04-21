@@ -2,17 +2,19 @@ import cv2
 import depth
 import filters
 from managers import WindowManager, CaptureManager
+# 两个新增模块
 import rects
 from trackers import FaceTracker
+
 
 class Cameo(object):
 
     def __init__(self):
-        self._windowManager = WindowManager('Cameo',
-                                            self.onKeypress)
-        self._captureManager = CaptureManager(
-            cv2.VideoCapture(0), self._windowManager, True)
+        self._windowManager = WindowManager('Cameo', self.onKeypress)
+        self._captureManager = CaptureManager(cv2.VideoCapture(0), self._windowManager, True)
+        # 调用FaceTracker()更新人脸
         self._faceTracker = FaceTracker()
+        # 是否创建掩模
         self._shouldDrawDebugRects = False
         self._curveFilter = filters.BGRPortraCurveFilter()
 
@@ -26,20 +28,25 @@ class Cameo(object):
             if frame is not None:
 
                 self._faceTracker.update(frame)
+                # 获取人脸跟踪器检测到的人脸列表，并将其赋值给 faces 变量。
                 faces = self._faceTracker.faces
+                # 交换人脸区域。
                 rects.swapRects(frame, frame,
                                 [face.faceRect for face in faces])
-
+                # 边缘检测
                 filters.strokeEdges(frame, frame)
+                # 用滤镜
                 self._curveFilter.apply(frame, frame)
 
                 if self._shouldDrawDebugRects:
+                    # 用于绘制矩形框
                     self._faceTracker.drawDebugRects(frame)
 
             self._captureManager.exitFrame()
             self._windowManager.processEvents()
 
     def onKeypress(self, keycode):
+        # 新增X按键用于开始或停止显示检测到的人脸矩形
         """Handle a keypress.
 
         space  -> Take a screenshot.
@@ -48,19 +55,19 @@ class Cameo(object):
         escape -> Quit.
 
         """
-        if keycode == 32: # space
+        if keycode == 32:  # space
             self._captureManager.writeImage('screenshot.png')
-        elif keycode == 9: # tab
+        elif keycode == 9:  # tab
             if not self._captureManager.isWritingVideo:
                 self._captureManager.startWritingVideo(
                     'screencast.avi')
             else:
                 self._captureManager.stopWritingVideo()
-        elif keycode == 120: # x
-            self._shouldDrawDebugRects = \
-                not self._shouldDrawDebugRects
-        elif keycode == 27: # escape
+        elif keycode == 120:  # x
+            self._shouldDrawDebugRects = not self._shouldDrawDebugRects
+        elif keycode == 27:  # escape
             self._windowManager.destroyWindow()
+
 
 class CameoDouble(Cameo):
 
@@ -102,13 +109,14 @@ class CameoDouble(Cameo):
             self._hiddenCaptureManager.exitFrame()
             self._windowManager.processEvents()
 
+
 class CameoDepth(Cameo):
 
     def __init__(self):
         self._windowManager = WindowManager('Cameo',
                                             self.onKeypress)
-        #device = cv2.CAP_OPENNI2 # uncomment for Microsoft Kinect via OpenNI2
-        device = cv2.CAP_OPENNI2_ASUS # uncomment for Asus Xtion or Occipital Structure via OpenNI2
+        # device = cv2.CAP_OPENNI2 # uncomment for Microsoft Kinect via OpenNI2
+        device = cv2.CAP_OPENNI2_ASUS  # uncomment for Asus Xtion or Occipital Structure via OpenNI2
         self._captureManager = CaptureManager(
             cv2.VideoCapture(device), self._windowManager, True)
         self._faceTracker = FaceTracker()
@@ -155,7 +163,8 @@ class CameoDepth(Cameo):
             self._captureManager.exitFrame()
             self._windowManager.processEvents()
 
-if __name__=="__main__":
-    #Cameo().run() # uncomment for single camera
-    #CameoDouble().run() # uncomment for double camera
-    CameoDepth().run() # uncomment for depth camera
+
+if __name__ == "__main__":
+    # Cameo().run()  # uncomment for single camera
+    # CameoDouble().run()  # uncomment for double camera
+    CameoDepth().run()  # uncomment for depth camera
