@@ -79,3 +79,7 @@
 #         chapter06/homography.py
 
 # 6.10　示例应用程序：文身取证
+#   先将文件描述符保存到../images/tattoos
+#   chapter06/generate_descriptors.py
+#   再扫描描述符集进行匹配
+#   chapter06/scan_for_matches.py
