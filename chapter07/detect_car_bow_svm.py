@@ -111,6 +111,7 @@ for test_img_path in ['CarData/TestImages/test-0.pgm',
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # 接受图像并返回由BoW描述符提取器计算的描述符向量
     descriptors = extract_bow_descriptors(gray_img)
+    # # 使用支持向量机分类器对特征/描述符进行分类
     # prediction变量是SVM模型的预测结果，一个包含两个元素的元组。
     # 第一个元素是预测类别，第二个元素是一个包含概率估计的数组。
     prediction = svm.predict(descriptors)

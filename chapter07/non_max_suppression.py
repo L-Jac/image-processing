@@ -1,6 +1,7 @@
 # import the necessary packages
 import numpy as np
 
+
 # Malisiewicz et al.
 # Python port by Adrian Rosebrock
 # https://www.pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/
@@ -13,11 +14,11 @@ def non_max_suppression_fast(boxes, overlapThresh):
     pick = []
 
     # grab the coordinates of the bounding boxes
-    x1 = boxes[:,0]
-    y1 = boxes[:,1]
-    x2 = boxes[:,2]
-    y2 = boxes[:,3]
-    scores = boxes[:,4]
+    x1 = boxes[:, 0]
+    y1 = boxes[:, 1]
+    x2 = boxes[:, 2]
+    y2 = boxes[:, 3]
+    scores = boxes[:, 4]
     # compute the area of the bounding boxes and sort the bounding
     # boxes by the score/probability of the bounding box
     area = (x2 - x1 + 1) * (y2 - y1 + 1)
@@ -49,7 +50,7 @@ def non_max_suppression_fast(boxes, overlapThresh):
 
         # delete all indexes from the index list that have
         idxs = np.delete(idxs, np.concatenate(([last],
-            np.where(overlap > overlapThresh)[0])))
+                                               np.where(overlap > overlapThresh)[0])))
 
     # return only the bounding boxes that were picked
     return boxes[pick]
