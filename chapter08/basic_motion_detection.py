@@ -32,6 +32,9 @@ while success:
     # 阈值化处理
     _, thresh = cv2.threshold(diff, 40, 255, cv2.THRESH_BINARY)
     # cv2.erode 和 cv2.dilate 函数对二值图像进行形态学处理，以去除噪声并填补空洞。
+    # 使用cv2.erode和cv2.dilate函数对二值图像进行腐蚀和膨胀操作
+    # 第三个参数是输出图像，第四个参数是迭代次数
+    # 腐蚀操作可以去除小的白色噪点，而膨胀操作可以填补小的黑色空洞
     cv2.erode(thresh, erode_kernel, thresh, iterations=2)
     cv2.dilate(thresh, dilate_kernel, thresh, iterations=2)
 

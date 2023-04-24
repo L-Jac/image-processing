@@ -23,6 +23,7 @@ kalman.processNoiseCov = np.array(
 last_measurement = None
 last_prediction = None
 
+
 def on_mouse_moved(event, x, y, flags, param):
     global img, kalman, last_measurement, last_prediction
 
@@ -49,6 +50,7 @@ def on_mouse_moved(event, x, y, flags, param):
 
     last_prediction = prediction.copy()
     last_measurement = measurement
+
 
 cv2.namedWindow('kalman_tracker')
 cv2.setMouseCallback('kalman_tracker', on_mouse_moved)

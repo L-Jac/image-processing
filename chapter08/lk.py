@@ -27,18 +27,18 @@ overlay = np.zeros_like(old_frame)
 colors = np.random.randint(0, 255, (100, 3))
 
 success, frame = cap.read()
-while(success):
+while success:
 
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Calculate the Lucas-Kanade optical flow.
     points, statuses, distances = cv2.calcOpticalFlowPyrLK(
-         old_gray_frame, gray_frame, old_points, None,
-         winSize=(15, 15), maxLevel=2, criteria=term_crit)
+        old_gray_frame, gray_frame, old_points, None,
+        winSize=(15, 15), maxLevel=2, criteria=term_crit)
 
     # Select the points that were successfully tracked.
-    good_points = points[statuses==1]
-    good_old_points = old_points[statuses==1]
+    good_points = points[statuses == 1]
+    good_old_points = old_points[statuses == 1]
 
     # Draw and show the motion trails.
     for i, (point, old_point) in enumerate(
