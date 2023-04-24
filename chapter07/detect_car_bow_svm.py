@@ -13,9 +13,9 @@ if not os.path.isdir('CarData'):
 # 两个训练阶段：
 # 一个阶段用于BoW词表，将使用大量图像作为样本；
 # 一个阶段用于支持向量机，将使用大量BoW描述符向量作为样本。
-# 用于训练 BoW 词表的样本数量
+# 用于训练 BoW 词表的样本数量(过大会出现过拟合)
 BOW_NUM_TRAINING_SAMPLES_PER_CLASS = 10
-# 用于训练SVM 的每个类别的样本数量
+# 用于训练SVM的每个类别的样本数量
 SVM_NUM_TRAINING_SAMPLES_PER_CLASS = 110
 
 # 创建 SIFT 特征检测器对象
@@ -102,10 +102,11 @@ svm.train(np.array(training_data), cv2.ml.ROW_SAMPLE,
 
 for test_img_path in ['CarData/TestImages/test-0.pgm',
                       'CarData/TestImages/test-1.pgm',
-                      '../images/car.jpg',
-                      '../images/haying.jpg',
-                      '../images/statue.jpg',
-                      '../images/woodcutters.jpg']:
+                      'CarData/car01.png',
+                      'CarData/car02.png',
+                      'CarData/car03.png',
+                      'CarData/car04.png',
+                      'CarData/car05.png']:
     # 常规灰度读图
     img = cv2.imread(test_img_path)
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
