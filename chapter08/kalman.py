@@ -52,7 +52,7 @@ def on_mouse_moved(event, x, y, flags, param):
         # 使用测量值对卡尔曼滤波器进行校正
         kalman.correct(measurement)
         # 使用卡尔曼滤波器的 predict 方法进行预测
-        prediction = kalman.predict()  # Gets a reference, not a copy
+        prediction = kalman.predict()  # prediction下一个状态
 
         # 在图像上绘制从上一个测量值到当前测量值的绿色线条，
         cv2.line(img, (int(last_measurement[0]), int(last_measurement[1])),
