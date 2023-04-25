@@ -60,3 +60,9 @@ MeanShift和CamShift是基于颜色直方图的目标跟踪算法可以在一定
     使用自组织映射（SOM）来对目标进行动态建模和更新，以应对目标外观的变化，并用SOM来生成反投影图像，以提高目标与背景的区分度。
     
 """
+# 8.4　使用卡尔曼滤波器寻找运动趋势
+#   chapter08/kalman.py
+
+# 8.5 跟踪行人
+#   chapter08/track_pedestrians_kalman_meanshift.py
+
