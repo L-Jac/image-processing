@@ -38,7 +38,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-
 import math
 import timeit
 
@@ -62,18 +61,16 @@ def map_2D_point_onto_3D_plane(point_2D, image_size, image_scale):
 
 def map_2D_points_onto_3D_plane(points_2D, image_size,
                                 image_real_height):
-
     w, h = image_size
     image_scale = image_real_height / h
 
     points_3D = [map_2D_point_onto_3D_plane(
-                     point_2D, image_size, image_scale)
-                 for point_2D in points_2D]
+        point_2D, image_size, image_scale)
+        for point_2D in points_2D]
     return numpy.array(points_3D, numpy.float32)
 
 
 def map_vertices_to_plane(image_size, image_real_height):
-
     w, h = image_size
 
     vertices_2D = [(0, 0), (w, 0), (w, h), (0, h)]
@@ -84,8 +81,7 @@ def map_vertices_to_plane(image_size, image_real_height):
     return vertices_3D, vertex_indices_by_face
 
 
-class ImageTrackingDemo():
-
+class ImageTrackingDemo:
 
     def __init__(self, capture, diagonal_fov_degrees=70.0,
                  target_fps=25.0,
@@ -154,9 +150,9 @@ class ImageTrackingDemo():
             reference_image_real_height
         reference_axis_length = 0.5 * reference_image_real_height
 
-        #-----------------------------------------------------------------------------
+        # -----------------------------------------------------------------------------
         # BEWARE!
-        #-----------------------------------------------------------------------------
+        # -----------------------------------------------------------------------------
         #
         # OpenCV's coordinate system has non-standard axis directions:
         #   +X:  object's left; viewer's right from frontal view
@@ -168,7 +164,7 @@ class ImageTrackingDemo():
         #   +Y:  up
         #   +Z:  object's forward; viewer's backward from frontal view
         #
-        #-----------------------------------------------------------------------------
+        # -----------------------------------------------------------------------------
         self._reference_axis_points_3D = numpy.array(
             [[0.0, 0.0, 0.0],
              [-reference_axis_length, 0.0, 0.0],
@@ -208,13 +204,13 @@ class ImageTrackingDemo():
         for segment_y, segment_x in numpy.ndindex(
                 (num_segments_y, num_segments_x)):
             y0 = reference_image_h * \
-                segment_y // num_segments_y - patchSize
+                 segment_y // num_segments_y - patchSize
             x0 = reference_image_w * \
-                segment_x // num_segments_x - patchSize
+                 segment_x // num_segments_x - patchSize
             y1 = reference_image_h * \
-                (segment_y + 1) // num_segments_y + patchSize
+                 (segment_y + 1) // num_segments_y + patchSize
             x1 = reference_image_w * \
-                (segment_x + 1) // num_segments_x + patchSize
+                 (segment_x + 1) // num_segments_x + patchSize
             reference_mask.fill(0)
             cv2.rectangle(
                 reference_mask, (x0, y0), (x1, y1), 255, cv2.FILLED)
@@ -259,9 +255,8 @@ class ImageTrackingDemo():
         (self._reference_vertices_3D,
          self._reference_vertex_indices_by_face) = \
             map_vertices_to_plane(
-                    gray_reference_image.shape[::-1],
-                    reference_image_real_height)
-
+                gray_reference_image.shape[::-1],
+                reference_image_real_height)
 
     def run(self):
 
@@ -279,7 +274,6 @@ class ImageTrackingDemo():
             if delta_time > 0.0:
                 fps = num_images_captured / delta_time
                 self._init_kalman_transition_matrix(fps)
-
 
     def _track_object(self):
 
@@ -300,7 +294,7 @@ class ImageTrackingDemo():
         good_matches = [
             match[0] for match in matches
             if len(match) > 1 and \
-                match[0].distance < 0.8 * match[1].distance
+               match[0].distance < 0.8 * match[1].distance
         ]
 
         # Select the good keypoints and draw them in red.
@@ -319,7 +313,7 @@ class ImageTrackingDemo():
 
         elif num_good_matches >= \
                 min_good_matches_to_start_tracking or \
-                    self._was_tracking:
+                self._was_tracking:
 
             # Select the 2D coordinates of the good matches.
             # They must be in an array of shape (N, 1, 2).
@@ -374,7 +368,6 @@ class ImageTrackingDemo():
                 # Make and draw a mask around the tracked object.
                 self._make_and_draw_object_mask()
 
-
     def _init_kalman_transition_matrix(self, fps):
 
         if fps <= 0.0:
@@ -425,27 +418,25 @@ class ImageTrackingDemo():
               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]],
             numpy.float32)
 
-
     def _init_kalman_state_matrices(self):
 
         t_x, t_y, t_z = self._translation_vector.flat
         pitch, yaw, roll = self._euler_rotation_vector.flat
 
         self._kalman.statePre = numpy.array(
-            [[t_x],   [t_y],  [t_z],
-             [0.0],   [0.0],  [0.0],
-             [0.0],   [0.0],  [0.0],
-             [pitch], [yaw],  [roll],
-             [0.0],   [0.0],  [0.0],
-             [0.0],   [0.0],  [0.0]], numpy.float32)
+            [[t_x], [t_y], [t_z],
+             [0.0], [0.0], [0.0],
+             [0.0], [0.0], [0.0],
+             [pitch], [yaw], [roll],
+             [0.0], [0.0], [0.0],
+             [0.0], [0.0], [0.0]], numpy.float32)
         self._kalman.statePost = numpy.array(
-            [[t_x],   [t_y],  [t_z],
-             [0.0],   [0.0],  [0.0],
-             [0.0],   [0.0],  [0.0],
-             [pitch], [yaw],  [roll],
-             [0.0],   [0.0],  [0.0],
-             [0.0],   [0.0],  [0.0]], numpy.float32)
-
+            [[t_x], [t_y], [t_z],
+             [0.0], [0.0], [0.0],
+             [0.0], [0.0], [0.0],
+             [pitch], [yaw], [roll],
+             [0.0], [0.0], [0.0],
+             [0.0], [0.0], [0.0]], numpy.float32)
 
     def _apply_kalman(self):
 
@@ -455,7 +446,7 @@ class ImageTrackingDemo():
         pitch, yaw, roll = self._euler_rotation_vector.flat
 
         estimate = self._kalman.correct(numpy.array(
-            [[t_x],   [t_y], [t_z],
+            [[t_x], [t_y], [t_z],
              [pitch], [yaw], [roll]], numpy.float32))
 
         translation_estimate = estimate[0:3]
@@ -486,7 +477,6 @@ class ImageTrackingDemo():
         else:
             self._euler_rotation_vector[:] = euler_rotation_estimate
             self._convert_euler_to_rodrigues()
-
 
     def _convert_rodrigues_to_euler(self):
 
@@ -521,7 +511,6 @@ class ImageTrackingDemo():
         self._euler_rotation_vector[0] = pitch
         self._euler_rotation_vector[1] = yaw
         self._euler_rotation_vector[2] = roll
-
 
     def _convert_euler_to_rodrigues(self):
 
@@ -561,7 +550,6 @@ class ImageTrackingDemo():
         self._rodrigues_rotation_vector, jacobian = cv2.Rodrigues(
             self._rotation_matrix, self._rodrigues_rotation_vector)
 
-
     def _draw_object_axes(self):
 
         points_2D, jacobian = cv2.projectPoints(
@@ -587,7 +575,6 @@ class ImageTrackingDemo():
         cv2.arrowedLine(
             self._bgr_image, origin, forward, (255, 0, 0), 2)
 
-
     def _make_and_draw_object_mask(self):
 
         # Project the object's vertices into the scene.
@@ -611,7 +598,6 @@ class ImageTrackingDemo():
 
 
 def main():
-
     capture = cv2.VideoCapture(0)
     capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
