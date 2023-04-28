@@ -41,10 +41,11 @@ def on_mouse_moved(event, x, y, flags, param):
     # 如果是，则表示这是第一次测量
     if last_measurement is None:
         # 卡尔曼滤波器的状态被更新以匹配测量值。预测值被设置为测量值。
-        # 先验状态和后验状态
         # x位置、y位置、x速度以及y速度。(鼠标初位置，速度0)
+        # 先验状态
         kalman.statePre = np.array(
             [[x], [y], [0], [0]], np.float32)
+        # 后验状态
         kalman.statePost = np.array(
             [[x], [y], [0], [0]], np.float32)
         prediction = measurement

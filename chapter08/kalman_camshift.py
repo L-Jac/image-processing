@@ -67,6 +67,7 @@ while success:
     box_points = np.int0(box_points)
     (cx, cy), radius = cv2.minEnclosingCircle(box_points)
     center = np.array([cx, cy], np.float32)
+    # 使用中心对卡尔曼滤波器进行校正
     estimate = kalman.correct(center)
     center_offset = estimate[:,0][:2] - center
 
