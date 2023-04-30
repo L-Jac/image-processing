@@ -63,7 +63,7 @@ class ImageTrackingDemo:
     # 初始化器将为参考图像设置采集设备、摄像头矩阵、卡尔曼滤波器以及2D和3D关键点。
     def __init__(self, capture, diagonal_fov_degrees=70.0,
                  target_fps=25.0,
-                 reference_image_path='reference_image.png',
+                 reference_image_path='01.png',
                  reference_image_real_height=1.0):
 
         # 假设镜头没有经历任何畸变
@@ -390,6 +390,7 @@ class ImageTrackingDemo:
                 # 该数组包含rx、ry和rz（6DOF姿态中的3个旋转自由度）。
                 self._rodrigues_rotation_vector[:] = \
                     rodrigues_rotation_vector_temp
+                # # 将罗德里格斯旋转向量转换为欧拉角。
                 self._convert_rodrigues_to_euler()
 
                 # 如果还没有跟踪，或者说如果我们开始重新跟踪这一帧中的物体，
@@ -554,12 +555,15 @@ class ImageTrackingDemo:
         # 否则，代码会更新欧拉角旋转向量，
         # 并调用_convert_euler_to_rodrigues方法进行转换。
         else:
-            # 欧拉角旋转向量和估计的欧拉角旋转向量
+            # 欧拉角旋转向量
             self._euler_rotation_vector[:] = euler_rotation_estimate
+            # 将欧拉角转换为罗德里格斯旋转向量
             self._convert_euler_to_rodrigues()
 
+    # 将罗德里格斯旋转向量转换为欧拉角。
     def _convert_rodrigues_to_euler(self):
 
+        # cv2.Rodrigues函数将罗德里格斯旋转向量转换为旋转矩阵。
         self._rotation_matrix, jacobian = cv2.Rodrigues(
             self._rodrigues_rotation_vector, self._rotation_matrix)
 
@@ -571,15 +575,15 @@ class ImageTrackingDemo:
         m20 = self._rotation_matrix[2, 0]
         m22 = self._rotation_matrix[2, 2]
 
-        # Convert to Euler angles using the yaw-pitch-roll
-        # Tait-Bryan convention.
+        # 将旋转矩阵转换为欧拉角，使用yaw-pitch-roll Tait-Bryan协议。
+        # “偏航-俯仰-滚动 Tait-Bryan协议”
         if m10 > 0.998:
-            # The rotation is near the "vertical climb" singularity.
+            # 如果旋转接近“垂直攀升”奇点。
             pitch = 0.5 * math.pi
             yaw = math.atan2(m02, m22)
             roll = 0.0
         elif m10 < -0.998:
-            # The rotation is near the "nose dive" singularity.
+            # 如果旋转接近“俯冲”奇点。
             pitch = -0.5 * math.pi
             yaw = math.atan2(m02, m22)
             roll = 0.0
@@ -588,10 +592,12 @@ class ImageTrackingDemo:
             yaw = math.atan2(-m20, m00)
             roll = math.atan2(-m12, m11)
 
+        # 将计算出的欧拉角存储在self._euler_rotation_vector中。
         self._euler_rotation_vector[0] = pitch
         self._euler_rotation_vector[1] = yaw
         self._euler_rotation_vector[2] = roll
 
+    # 将欧拉角转换为罗德里格斯旋转向量
     def _convert_euler_to_rodrigues(self):
 
         pitch = self._euler_rotation_vector[0]
@@ -605,8 +611,8 @@ class ImageTrackingDemo:
         croll = math.cos(roll)
         sroll = math.sin(roll)
 
-        # Convert from Euler angles using the yaw-pitch-roll
-        # Tait-Bryan convention.
+        # 将欧拉角转换为旋转矩阵，使用yaw-pitch-roll Tait-Bryan协议。
+        # “偏航-俯仰-滚动 Tait-Bryan协议”
         m00 = cyaw * cpitch
         m01 = syaw * sroll - cyaw * spitch * croll
         m02 = cyaw * spitch * sroll + syaw * croll
@@ -630,14 +636,23 @@ class ImageTrackingDemo:
         self._rodrigues_rotation_vector, jacobian = cv2.Rodrigues(
             self._rotation_matrix, self._rodrigues_rotation_vector)
 
+    # 可视化绘制跟踪物体的X、Y和Z轴
     def _draw_object_axes(self):
 
+        # 将3D参考轴点投影到2D图像平面上
+        # objectPoints：3D点的数组。
+        # rvec：旋转向量，用于指定3D点相对于相机坐标系的旋转。
+        # tvec：平移向量，用于指定3D点相对于相机坐标系的平移。
+        # cameraMatrix：相机内参矩阵，包含了焦距和主点坐标等信息。
+        # distCoeffs：畸变系数，用于校正镜头畸变。
+        # 该函数返回投影后的2D点坐标以及雅可比矩阵。投影后的2D点坐标可以直接用于在图像上绘制3D点。
         points_2D, jacobian = cv2.projectPoints(
             self._reference_axis_points_3D,
             self._rodrigues_rotation_vector,
             self._translation_vector, self._camera_matrix,
             self._distortion_coefficients)
 
+        # 取点绘线
         origin = (int(points_2D[0, 0, 0]), int(points_2D[0, 0, 1]))
         right = (int(points_2D[1, 0, 0]), int(points_2D[1, 0, 1]))
         up = (int(points_2D[2, 0, 0]), int(points_2D[2, 0, 1]))
@@ -657,7 +672,17 @@ class ImageTrackingDemo:
 
     def _make_and_draw_object_mask(self):
 
-        # Project the object's vertices into the scene.
+        # 将物体的顶点投影到场景中。
+        # cv2.projectPoints用于计算世界坐标系中的三维点投影到像素坐标系中的二维坐标。
+        # 使用针孔相机模型，通过透视变换将场景中的3D点投影到图像平面上形成相应的像素。
+        # cv2.projectPoints 的参数包括：
+        # objectPoints：物体上的三维点的数组。
+        # rvec：旋转向量，表示从世界坐标系到相机坐标系的旋转。
+        # tvec：平移向量，表示从世界坐标系到相机坐标系的平移。
+        # cameraMatrix：相机内参矩阵。
+        # distCoeffs：畸变系数。
+        # imagePoints：输出的图像点。
+        # jacobian：输出的雅可比矩阵。
         vertices_2D, jacobian = cv2.projectPoints(
             self._reference_vertices_3D,
             self._rodrigues_rotation_vector,
@@ -665,14 +690,30 @@ class ImageTrackingDemo:
             self._distortion_coefficients)
         vertices_2D = vertices_2D.astype(numpy.int32)
 
-        # Make a mask based on the projected vertices.
+        # 根据投影后的顶点创建掩模。
         self._mask.fill(0)
-        for vertex_indices in \
-                self._reference_vertex_indices_by_face:
+        for vertex_indices in self._reference_vertex_indices_by_face:
+            # cv2.fillConvexPoly 是 OpenCV 库中的一个函数，它用于填充凸多边形。
+            # 你只需要提供凸多边形的顶点即可
+            # cv2.fillConvexPoly 的参数包括：
+            # img：要绘制多边形的图像。
+            # points：多边形顶点的数组。
+            # color：多边形颜色。
+            # lineType：可选参数，线条类型。
+            # shift：可选参数，点坐标中小数点位数。
             cv2.fillConvexPoly(
                 self._mask, vertices_2D[vertex_indices], 255)
 
-        # Draw the mask in semi-transparent yellow.
+        # 用半透明的黄色绘制掩模。
+        # cv2.subtract用于计算两个数组（图像）之间的差值。
+        # 可以处理相同大小的矩阵之间的差值运算，也可以处理矩阵与标量之间的相减运算。
+        # 当矩阵是多通道时，相应的标量类似于一个向量
+        # cv2.subtract 的参数包括：
+        # src1：第一个输入数组或标量。
+        # src2：第二个输入数组或标量。
+        # dst：输出数组，与输入数组大小和类型相同。
+        # mask：可选操作掩码，8位单通道数组，用于指定要更改的输出数组元素。
+        # dtype：可选参数，输出数组的深度。
         cv2.subtract(
             self._bgr_image, 48, self._bgr_image, self._mask)
 
