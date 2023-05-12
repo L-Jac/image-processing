@@ -72,3 +72,5 @@ while success:
         break
 
     success, frame = cap.read()
+cap.release()
+cv2.destroyAllWindows()
